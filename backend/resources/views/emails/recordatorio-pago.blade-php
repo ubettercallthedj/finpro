@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recordatorio de Pago</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .alert {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .info-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .info-box table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .info-box td {
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .info-box td:first-child {
+            font-weight: bold;
+            width: 40%;
+        }
+        .amount {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔔 Recordatorio de Pago</h1>
+            <p>Gastos Comunes</p>
+        </div>
+
+        <div class="content">
+            <p>Estimado/a <strong>{{ $propietario }}</strong>,</p>
+
+            <div class="alert">
+                @if($dias_restantes > 0)
+                    <strong>⏰ Su boleta de gastos comunes vence en {{ $dias_restantes }} {{ $dias_restantes === 1 ? 'día' : 'días' }}</strong>
+                @else
+                    <strong>⚠️ Su boleta de gastos comunes está vencida</strong>
+                @endif
+            </div>
+
+            <p>Le recordamos que tiene pendiente el pago de los gastos comunes correspondientes a:</p>
+
+            <div class="info-box">
+                <table>
+                    <tr>
+                        <td>Edificio/Comunidad:</td>
+                        <td>{{ $edificio }}</td>
+                    </tr>
+                    <tr>
+                        <td>Unidad:</td>
+                        <td>{{ $unidad }}</td>
+                    </tr>
+                    <tr>
+                        <td>Período:</td>
+                        <td>{{ $periodo }}</td>
+                    </tr>
+                    <tr>
+                        <td>N° Boleta:</td>
+                        <td>{{ $numero_boleta }}</td>
+                    </tr>
+                    <tr>
+                        <td>Fecha de Vencimiento:</td>
+                        <td><strong>{{ $fecha_vencimiento }}</strong></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="amount">
+                ${{ $monto }}
+            </div>
+
+            <p style="text-align: center;">
+                <a href="{{ url('/') }}" class="button">Ver Boleta en Línea</a>
+            </p>
+
+            <h3>Datos para Transferencia:</h3>
+            <div class="info-box">
+                <table>
+                    <tr>
+                        <td>Banco:</td>
+                        <td>[Nombre del Banco]</td>
+                    </tr>
+                    <tr>
+                        <td>Cuenta Corriente:</td>
+                        <td>[Número de Cuenta]</td>
+                    </tr>
+                    <tr>
+                        <td>RUT:</td>
+                        <td>[RUT del Edificio]</td>
+                    </tr>
+                    <tr>
+                        <td>Email:</td>
+                        <td>[Email para enviar comprobante]</td>
+                    </tr>
+                </table>
+            </div>
+
+            <p><small>Al realizar el pago, por favor envíe el comprobante de transferencia al email indicado con su número de unidad en el asunto.</small></p>
+
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+
+            <p><strong>¿Necesita ayuda?</strong><br>
+            Contáctenos a través de nuestros canales de atención.</p>
+        </div>
+
+        <div class="footer">
+            <p><strong>DATAPOLIS PRO</strong> - Sistema de Gestión de Comunidades</p>
+            <p>Este es un correo automático, por favor no responder a esta dirección.</p>
+            <p style="margin-top: 10px; color: #999;">
+                © {{ date('Y') }} Todos los derechos reservados.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
