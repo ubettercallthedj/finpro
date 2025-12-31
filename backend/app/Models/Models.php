@@ -673,3 +673,70 @@ class PlanCuenta extends Model
         'activa' => 'boolean',
     ];
 }
+
+class BoletaGC extends Model
+{
+    use SoftDeletes;
+
+    protected $table = 'boletas_gc';
+
+    protected $fillable = [
+        'tenant_id', 'edificio_id', 'periodo_id', 'unidad_id', 'numero_boleta',
+        'fecha_emision', 'fecha_vencimiento', 'fecha_segundo_vencimiento',
+        'saldo_anterior', 'total_cargos', 'total_abonos', 'total_intereses',
+        'total_a_pagar', 'estado', 'dias_mora', 'observaciones', 'archivo_pdf', 'enviada_at',
+    ];
+
+    protected $casts = [
+        'fecha_emision' => 'date',
+        'fecha_vencimiento' => 'date',
+        'fecha_segundo_vencimiento' => 'date',
+        'enviada_at' => 'datetime',
+        'saldo_anterior' => 'decimal:2',
+        'total_cargos' => 'decimal:2',
+        'total_abonos' => 'decimal:2',
+        'total_intereses' => 'decimal:2',
+        'total_a_pagar' => 'decimal:2',
+    ];
+
+    public function periodo(): BelongsTo
+    {
+        return $this->belongsTo(PeriodoGC::class, 'periodo_id');
+    }
+
+    public function unidad(): BelongsTo
+    {
+        return $this->belongsTo(Unidad::class);
+    }
+
+    public function cargos(): HasMany
+    {
+        return $this->hasMany(CargoGC::class, 'boleta_id');
+    }
+
+    public function pagos(): HasMany
+    {
+        return $this->hasMany(PagoGC::class, 'boleta_id');
+    }
+
+    public function edificio(): BelongsTo
+    {
+        return $this->belongsTo(Edificio::class);
+    }
+
+    /**
+     * Calcular saldo pendiente
+     */
+    public function getSaldoPendienteAttribute(): float
+    {
+        return $this->total_a_pagar - ($this->total_abonos ?? 0);
+    }
+
+    /**
+     * Verificar si está vencida
+     */
+    public function getEstaVencidaAttribute(): bool
+    {
+        return $this->fecha_vencimiento < now() && in_array($this->estado, ['pendiente', 'parcial']);
+    }
+}
