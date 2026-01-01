@@ -1,9 +1,30 @@
+# En la raíz del proyecto
+cat > .gitignore << 'EOF'
 /node_modules
+/public/hot
+/public/storage
+/storage/*.key
 /vendor
 .env
 .env.backup
+.phpunit.result.cache
+docker-compose.override.yml
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/.idea
+/.vscode
 *.log
 .DS_Store
 backend/storage/logs/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+!backend/storage/logs/.gitkeep
+!backend/storage/framework/cache/.gitkeep
+!backend/storage/framework/sessions/.gitkeep
+!backend/storage/framework/views/.gitkeep
 frontend/dist
 frontend/node_modules
+EOF
