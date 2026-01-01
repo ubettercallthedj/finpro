@@ -9,8 +9,23 @@ cmds = [
 
 [phases.build]
 cmds = [
-    'cd frontend && npm run build',
-    'cd backend && php artisan config:cache'
+    # CREAR CARPETAS ANTES DE BUILD
+    'mkdir -p backend/bootstrap/cache',
+    'mkdir -p backend/storage/framework/cache',
+    'mkdir -p backend/storage/framework/sessions',
+    'mkdir -p backend/storage/framework/views',
+    'mkdir -p backend/storage/logs',
+    'mkdir -p backend/storage/app/public',
+    'chmod -R 775 backend/bootstrap/cache',
+    'chmod -R 775 backend/storage',
+    # AHORA BUILD
+    'cd frontend && npm run build'
+]
+
+[phases.release]
+cmds = [
+    'cd backend && php artisan migrate --force',
+    'php artisan config:cache'
 ]
 
 [start]
