@@ -1,3 +1,4 @@
+# ...existing code...
 #!/bin/bash
 #===============================================================================
 # DATAPOLIS PRO v2.5 - Script de Instalación Mejorado
@@ -43,11 +44,11 @@ info() {
 spinner() {
     local pid=$1
     local delay=0.1
-    local spinstr='|/-\'
-    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+    local spinstr="|/-\\"
+    while ps -p "$pid" > /dev/null 2>&1; do
         local temp=${spinstr#?}
         printf " [%c]  " "$spinstr"
-        local spinstr=$temp${spinstr%"$temp"}
+        spinstr=$temp${spinstr%"$temp"}
         sleep $delay
         printf "\b\b\b\b\b\b"
     done
@@ -155,12 +156,18 @@ get_configuration() {
         fi
     done
     
+    INSTALL_SSL="n"
+    SSL_EMAIL=""
     if [ "$INSTALL_TYPE" = "1" ]; then
         read -p "$(echo -e ${CYAN}¿Instalar SSL con Let's Encrypt? ${NC}[s/n]: )" INSTALL_SSL
         INSTALL_SSL=${INSTALL_SSL:-n}
         
         if [ "$INSTALL_SSL" = "s" ] || [ "$INSTALL_SSL" = "S" ]; then
             read -p "$(echo -e ${CYAN}Email para Let's Encrypt: ${NC})" SSL_EMAIL
+            if [ -z "$SSL_EMAIL" ]; then
+                warn "Email vacío. SSL no será configurado."
+                INSTALL_SSL="n"
+            fi
         fi
     fi
     
@@ -205,7 +212,7 @@ install_php() {
     fi
     
     apt install -y software-properties-common > /dev/null 2>&1
-    add-apt-repository ppa:ondrej/php -y > /dev/null 2>&1
+    add-apt-repository ppa:ondrej/php -y > /dev/null 2>&1 || true
     apt update > /dev/null 2>&1
     
     apt install -y \
@@ -224,12 +231,15 @@ install_php() {
     spinner $!
     
     # Configurar PHP
-    sed -i 's/upload_max_filesize = .*/upload_max_filesize = 100M/' /etc/php/${PHP_VERSION}/fpm/php.ini
-    sed -i 's/post_max_size = .*/post_max_size = 100M/' /etc/php/${PHP_VERSION}/fpm/php.ini
-    sed -i 's/max_execution_time = .*/max_execution_time = 300/' /etc/php/${PHP_VERSION}/fpm/php.ini
-    sed -i 's/memory_limit = .*/memory_limit = 512M/' /etc/php/${PHP_VERSION}/fpm/php.ini
+    PHP_INI="/etc/php/${PHP_VERSION}/fpm/php.ini"
+    if [ -f "$PHP_INI" ]; then
+        sed -i 's/upload_max_filesize = .*/upload_max_filesize = 100M/' "$PHP_INI"
+        sed -i 's/post_max_size = .*/post_max_size = 100M/' "$PHP_INI"
+        sed -i 's/max_execution_time = .*/max_execution_time = 300/' "$PHP_INI"
+        sed -i 's/memory_limit = .*/memory_limit = 512M/' "$PHP_INI"
+    fi
     
-    systemctl restart php${PHP_VERSION}-fpm
+    systemctl restart php${PHP_VERSION}-fpm || true
     
     info "PHP $PHP_VERSION instalado y configurado"
 }
@@ -346,37 +356,41 @@ install_application() {
     spinner $!
     
     # Crear .env
-    cp .env.example .env
-    sed -i "s|APP_URL=.*|APP_URL=$([ "$INSTALL_TYPE" = "1" ] && echo "https://${SERVER_NAME}" || echo "http://${SERVER_NAME}")|g" .env
-    sed -i "s|APP_ENV=.*|APP_ENV=$([ "$INSTALL_TYPE" = "1" ] && echo "production" || echo "local")|g" .env
-    sed -i "s|APP_DEBUG=.*|APP_DEBUG=$([ "$INSTALL_TYPE" = "1" ] && echo "false" || echo "true")|g" .env
-    sed -i "s|DB_DATABASE=.*|DB_DATABASE=${DB_NAME}|g" .env
-    sed -i "s|DB_USERNAME=.*|DB_USERNAME=${DB_USER}|g" .env
-    sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=${DB_PASS}|g" .env
+    if [ -f .env.example ]; then
+        cp .env.example .env
+        sed -i "s|APP_URL=.*|APP_URL=$([ "$INSTALL_TYPE" = "1" ] && echo "https://${SERVER_NAME}" || echo "http://${SERVER_NAME}")|g" .env
+        sed -i "s|APP_ENV=.*|APP_ENV=$([ "$INSTALL_TYPE" = "1" ] && echo "production" || echo "local")|g" .env
+        sed -i "s|APP_DEBUG=.*|APP_DEBUG=$([ "$INSTALL_TYPE" = "1" ] && echo "false" || echo "true")|g" .env
+        sed -i "s|DB_DATABASE=.*|DB_DATABASE=${DB_NAME}|g" .env
+        sed -i "s|DB_USERNAME=.*|DB_USERNAME=${DB_USER}|g" .env
+        sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=${DB_PASS}|g" .env
+    fi
     
     # Generar key y migrar
     php artisan key:generate --force
     php artisan migrate --seed --force > /dev/null 2>&1 &
     spinner $!
     
-    php artisan storage:link
+    php artisan storage:link || true
     
     if [ "$INSTALL_TYPE" = "1" ]; then
-        php artisan config:cache
-        php artisan route:cache
-        php artisan view:cache
+        php artisan config:cache || true
+        php artisan route:cache || true
+        php artisan view:cache || true
     fi
     
     info "Backend configurado"
     
     # Configurar Frontend
     log "Configurando React frontend..."
-    cd $INSTALL_DIR/frontend
+    cd $INSTALL_DIR/frontend || return
     
     # Crear .env
-    cp .env.example .env
-    sed -i "s|VITE_API_URL=.*|VITE_API_URL=$([ "$INSTALL_TYPE" = "1" ] && echo "https://${SERVER_NAME}/api" || echo "http://${SERVER_NAME}:8000/api")|g" .env
-    sed -i "s|VITE_ENV=.*|VITE_ENV=$([ "$INSTALL_TYPE" = "1" ] && echo "production" || echo "development")|g" .env
+    if [ -f .env.example ]; then
+        cp .env.example .env
+        sed -i "s|VITE_API_URL=.*|VITE_API_URL=$([ "$INSTALL_TYPE" = "1" ] && echo "https://${SERVER_NAME}/api" || echo "http://${SERVER_NAME}:8000/api")|g" .env
+        sed -i "s|VITE_ENV=.*|VITE_ENV=$([ "$INSTALL_TYPE" = "1" ] && echo "production" || echo "development")|g" .env
+    fi
     
     npm install > /dev/null 2>&1 &
     spinner $!
@@ -443,10 +457,10 @@ EOF
 
     # Activar sitio
     ln -sf /etc/nginx/sites-available/datapolis /etc/nginx/sites-enabled/
-    rm -f /etc/nginx/sites-enabled/default
+    rm -f /etc/nginx/sites-enabled/default || true
     
     nginx -t > /dev/null 2>&1
-    systemctl restart nginx
+    systemctl restart nginx || true
     
     info "Nginx configurado"
 }
@@ -461,7 +475,7 @@ configure_ssl() {
     apt install -y certbot python3-certbot-nginx > /dev/null 2>&1 &
     spinner $!
     
-    certbot --nginx -d ${SERVER_NAME} --non-interactive --agree-tos -m ${SSL_EMAIL} --redirect
+    certbot --nginx -d ${SERVER_NAME} --non-interactive --agree-tos -m ${SSL_EMAIL} --redirect || warn "Certbot falló"
     
     info "SSL configurado"
 }
@@ -471,8 +485,8 @@ configure_permissions() {
     
     chown -R www-data:www-data $INSTALL_DIR
     chmod -R 755 $INSTALL_DIR
-    chmod -R 775 $INSTALL_DIR/backend/storage
-    chmod -R 775 $INSTALL_DIR/backend/bootstrap/cache
+    chmod -R 775 $INSTALL_DIR/backend/storage || true
+    chmod -R 775 $INSTALL_DIR/backend/bootstrap/cache || true
     
     info "Permisos configurados"
 }
@@ -531,7 +545,7 @@ EOF
 
     systemctl daemon-reload
     systemctl enable datapolis-queue
-    systemctl start datapolis-queue
+    systemctl start datapolis-queue || true
     
     info "Servicio queue configurado"
 }
@@ -620,3 +634,4 @@ main() {
 
 # Ejecutar
 main "$@"
+# ...existing code...
