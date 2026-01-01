@@ -45,7 +45,6 @@ services:
     restart: unless-stopped
     working_dir: /var/www
     volumes:
-      - ./backend:/var/www
       - ./backend/storage:/var/www/storage
     ports:
       - "8000:8000"

@@ -13,7 +13,7 @@ WORKDIR /app
 
 # Copy package files and install
 COPY package*.json ./
-RUN npm ci
+RUN sh -c 'if [ -f package-lock.json ]; then npm ci; else npm install; fi'
 
 # Copy application code
 COPY . .

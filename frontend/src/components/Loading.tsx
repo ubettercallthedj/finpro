@@ -1,4 +1,4 @@
-import React from 'react'
+// React import not required with modern JSX transform
 
 interface LoadingProps {
   /**
