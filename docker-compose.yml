@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # MySQL Database
   mysql:
     image: mysql:8.0
     container_name: datapolis_mysql
@@ -23,7 +22,6 @@ services:
       timeout: 20s
       retries: 10
 
-  # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: datapolis_redis
@@ -39,7 +37,6 @@ services:
       timeout: 3s
       retries: 5
 
-  # Laravel Backend
   backend:
     build:
       context: ./backend
@@ -72,16 +69,15 @@ services:
       - datapolis_network
     command: php artisan serve --host=0.0.0.0 --port=8000
 
-  # React Frontend
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: datapolis_frontend
     restart: unless-stopped
     volumes:
       - ./frontend:/app
-      - /app/node_modules
+      - frontend_node_modules:/app/node_modules
     ports:
       - "3000:3000"
     environment:
@@ -91,7 +87,6 @@ services:
       - datapolis_network
     command: npm run dev
 
-  # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
     container_name: datapolis_nginx
@@ -110,39 +105,20 @@ services:
     networks:
       - datapolis_network
 
-  # MailHog (Email Testing)
   mailhog:
     image: mailhog/mailhog
     container_name: datapolis_mailhog
     restart: unless-stopped
     ports:
-      - "1025:1025"  # SMTP
-      - "8025:8025"  # Web UI
-    networks:
-      - datapolis_network
-
-  # PhpMyAdmin
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: datapolis_phpmyadmin
-    restart: unless-stopped
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      PMA_USER: datapolis
-      PMA_PASSWORD: datapolis123
-    ports:
-      - "8080:80"
-    depends_on:
-      - mysql
+      - "1025:1025"
+      - "8025:8025"
     networks:
       - datapolis_network
 
 volumes:
   mysql_data:
-    driver: local
   redis_data:
-    driver: local
+  frontend_node_modules:
 
 networks:
   datapolis_network:
