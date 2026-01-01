@@ -42,7 +42,7 @@ cp .env.example .env
 npm run dev
 
 # Abrir en navegador
-# http://localhost:3000
+# http://localhost:5173
 ```
 
 ## 🏗️ Build
@@ -64,7 +64,7 @@ npm run test
 # Tests con coverage
 npm run test:coverage
 
-# Tests E2E
+# Tests E2E con Playwright
 npm run test:e2e
 ```
 
@@ -88,12 +88,12 @@ frontend/
 ├── public/                 # Archivos estáticos
 │   └── favicon.svg
 ├── src/
-│   ├── components/        # Componentes reutilizables (pendiente)
+│   ├── components/        # Componentes reutilizables
 │   │   ├── ui/           # Componentes UI básicos
 │   │   └── layouts/      # Layouts
 │   ├── context/          # React Context
 │   │   └── AuthContext.tsx
-│   ├── hooks/            # Custom hooks (pendiente)
+│   ├── hooks/            # Custom hooks
 │   ├── pages/            # Páginas de la aplicación
 │   │   ├── DashboardPage.tsx
 │   │   ├── EdificiosPage.tsx
@@ -110,8 +110,8 @@ frontend/
 │   │   └── ConfiguracionPage.tsx
 │   ├── services/         # Servicios y API
 │   │   └── api.ts
-│   ├── types/            # TypeScript types (pendiente)
-│   ├── utils/            # Utilidades (pendiente)
+│   ├── types/            # TypeScript types
+│   ├── utils/            # Utilidades
 │   ├── App.tsx           # Componente principal
 │   ├── main.tsx          # Entry point
 │   └── index.css         # Estilos globales
@@ -327,7 +327,7 @@ VITE_ENV=production
 - ✅ Code splitting por ruta
 - ✅ Lazy loading de componentes
 - ✅ React Query caching
-- ✅ Memoización con React.memo (pendiente)
+- ✅ Memoización con React.memo
 - ✅ Virtualización de listas (pendiente)
 
 ## 🤝 Contribución
@@ -348,11 +348,12 @@ style: formateo, punto y coma faltantes, etc
 refactor: refactorización de código
 test: agregar tests
 chore: tareas de mantenimiento
+perf: mejora de performance
 ```
 
 ## 📄 Licencia
 
-Propietario - DATAPOLIS PRO © 2025
+Propietario - DATAPOLIS PRO © 2026
 
 ## 👥 Equipo
 
@@ -369,4 +370,4 @@ Propietario - DATAPOLIS PRO © 2025
 
 ---
 
-**Última actualización**: 31 de diciembre de 2025
+**Última actualización**: 1 de enero de 2026

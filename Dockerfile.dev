@@ -6,26 +6,27 @@ FROM node:20-alpine
 
 LABEL maintainer="DATAPOLIS SpA"
 LABEL version="2.5.0"
+LABEL description="Development environment for React/Vite frontend"
 
-# Instalar dependencias del sistema
+# Install dependencies for development
 RUN apk add --no-cache \
     git \
-    curl
+    curl \
+    wget
 
-# Crear directorio de trabajo
 WORKDIR /app
 
-# Copiar package files
+# Copy package files
 COPY package*.json ./
 
-# Instalar dependencias
-RUN npm ci
+# Install dependencies (including dev dependencies)
+RUN npm install
 
-# Copiar código fuente
+# Copy source code
 COPY . .
 
-# Exponer puerto
-EXPOSE 3000
+# Expose Vite dev server port
+EXPOSE 5173
 
-# Comando por defecto
+# Start development server
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
