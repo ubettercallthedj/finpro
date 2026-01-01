@@ -29,8 +29,13 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-if ! command -v docker-compose &> /dev/null; then
-    echo -e "${RED}Error: Docker Compose no está instalado${NC}"
+# Check for docker-compose plugin or legacy binary.
+if command -v docker-compose &> /dev/null; then
+    COMPOSE_CMD="docker-compose"
+elif docker compose version >/dev/null 2>&1; then
+    COMPOSE_CMD="docker compose"
+else
+    echo -e "${RED}Error: Docker Compose no está instalado (ni docker-compose ni docker compose disponibles)${NC}"
     exit 1
 fi
 
@@ -49,11 +54,11 @@ fi
 
 # Construir contenedores
 echo -e "${GREEN}[2/6] Construyendo contenedores Docker...${NC}"
-docker-compose build
+$COMPOSE_CMD build
 
 # Iniciar servicios
 echo -e "${GREEN}[3/6] Iniciando servicios...${NC}"
-docker-compose up -d mysql redis
+$COMPOSE_CMD up -d mysql redis
 
 # Esperar a que MySQL esté listo
 echo -e "${GREEN}[4/6] Esperando a que MySQL esté listo...${NC}"
@@ -61,7 +66,7 @@ sleep 10
 
 # Configurar backend
 echo -e "${GREEN}[5/6] Configurando Laravel backend...${NC}"
-docker-compose run --rm backend bash -c "
+$COMPOSE_CMD run --rm backend bash -c "
     composer install &&
     php artisan key:generate &&
     php artisan migrate:fresh --seed &&
@@ -71,7 +76,7 @@ docker-compose run --rm backend bash -c "
 
 # Iniciar todos los servicios
 echo -e "${GREEN}[6/6] Iniciando aplicación...${NC}"
-docker-compose up -d
+$COMPOSE_CMD up -d
 
 echo ""
 echo -e "${BLUE}╔═══════════════════════════════════════════════════════════════╗${NC}"
@@ -79,21 +84,3 @@ echo -e "${GREEN}║           ✅ DATAPOLIS PRO INICIADO CORRECTAMENTE         
 echo -e "${BLUE}╚═══════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "${YELLOW}Servicios disponibles:${NC}"
-echo -e "  Frontend:     ${GREEN}http://localhost:3000${NC}"
-echo -e "  Backend API:  ${GREEN}http://localhost:8000${NC}"
-echo -e "  PhpMyAdmin:   ${GREEN}http://localhost:8080${NC}"
-echo -e "  MailHog:      ${GREEN}http://localhost:8025${NC}"
-echo ""
-echo -e "${YELLOW}Credenciales por defecto:${NC}"
-echo -e "  Email:    ${GREEN}admin@datapolis.cl${NC}"
-echo -e "  Password: ${GREEN}DataPolis2025!${NC}"
-echo ""
-echo -e "${YELLOW}Comandos útiles:${NC}"
-echo "  Ver logs:           docker-compose logs -f"
-echo "  Detener:            docker-compose down"
-echo "  Reiniciar:          docker-compose restart"
-echo "  Shell backend:      docker-compose exec backend bash"
-echo "  Shell frontend:     docker-compose exec frontend sh"
-echo "  Migrar BD:          docker-compose exec backend php artisan migrate"
-echo ""
-echo -e "${BLUE}Happy coding! 🚀${NC}"
