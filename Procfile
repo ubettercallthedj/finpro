@@ -6,7 +6,6 @@ cmds = [
   "cd backend && composer install --no-dev --optimize-autoloader",
   "cd frontend && npm install"
 ]
-
 [phases.build]
 cmds = [
   "mkdir -p backend/bootstrap/cache",
