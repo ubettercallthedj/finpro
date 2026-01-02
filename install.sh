@@ -1,6 +1,6 @@
 #!/bin/bash
 #===============================================================================
-# DATAPOLIS PRO v2.5 - Script de Instalación Automatizada
+# DATAPOLIS PRO v2.5 - Script de Instalación Mejorado
 # Sistema de Gestión Integral para Condominios
 # © 2025 DATAPOLIS SpA
 #===============================================================================
@@ -12,215 +12,291 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m'
 
-echo -e "${BLUE}"
-echo "╔═══════════════════════════════════════════════════════════════╗"
-echo "║           DATAPOLIS PRO v2.5 - Instalación                    ║"
-echo "║       Sistema de Gestión Integral para Condominios            ║"
-echo "╚═══════════════════════════════════════════════════════════════╝"
-echo -e "${NC}"
-
-# Verificar que se ejecuta como root
-if [ "$EUID" -ne 0 ]; then 
-    echo -e "${RED}Error: Este script debe ejecutarse como root${NC}"
-    echo "Ejecute: sudo bash install.sh"
-    exit 1
-fi
-
-# Variables de configuración
-read -p "Ingrese la IP o dominio del servidor [localhost]: " SERVER_NAME
-SERVER_NAME=${SERVER_NAME:-localhost}
-
-read -p "Ingrese el nombre de la base de datos [datapolis]: " DB_NAME
-DB_NAME=${DB_NAME:-datapolis}
-
-read -p "Ingrese el usuario de la base de datos [datapolis]: " DB_USER
-DB_USER=${DB_USER:-datapolis}
-
-read -sp "Ingrese la contraseña de la base de datos: " DB_PASS
-echo ""
-
-if [ -z "$DB_PASS" ]; then
-    echo -e "${RED}Error: La contraseña no puede estar vacía${NC}"
-    exit 1
-fi
-
+# Variables globales
 INSTALL_DIR="/var/www/datapolis"
+LOG_FILE="/tmp/datapolis_install.log"
+PHP_VERSION="8.3"
+NODE_VERSION="20"
+INSTALL_TYPE=""
+INSTALL_SSL=""
+SERVER_NAME=""
 
-echo ""
-echo -e "${YELLOW}Configuración:${NC}"
-echo "  Servidor: $SERVER_NAME"
-echo "  Base de datos: $DB_NAME"
-echo "  Usuario BD: $DB_USER"
-echo "  Directorio: $INSTALL_DIR"
-echo ""
-read -p "¿Continuar con la instalación? (s/n): " CONFIRM
-if [ "$CONFIRM" != "s" ] && [ "$CONFIRM" != "S" ]; then
-    echo "Instalación cancelada."
-    exit 0
-fi
-
-echo ""
-echo -e "${GREEN}[1/10] Actualizando sistema...${NC}"
-apt update && apt upgrade -y
-
-echo ""
-echo -e "${GREEN}[2/10] Instalando PHP 8.3...${NC}"
-apt install -y software-properties-common
-add-apt-repository ppa:ondrej/php -y
-apt update
-apt install -y php8.3 php8.3-fpm php8.3-mysql php8.3-xml php8.3-mbstring \
-    php8.3-curl php8.3-zip php8.3-gd php8.3-bcmath php8.3-intl php8.3-redis
-
-echo ""
-echo -e "${GREEN}[3/10] Instalando MySQL...${NC}"
-apt install -y mysql-server
-
-echo ""
-echo -e "${GREEN}[4/10] Instalando Nginx...${NC}"
-apt install -y nginx
-
-echo ""
-echo -e "${GREEN}[5/10] Instalando Composer...${NC}"
-if ! command -v composer &> /dev/null; then
-    curl -sS https://getcomposer.org/installer | php
-    mv composer.phar /usr/local/bin/composer
-fi
-
-echo ""
-echo -e "${GREEN}[6/10] Instalando Node.js 20...${NC}"
-if ! command -v node &> /dev/null; then
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-    apt install -y nodejs
-fi
-
-echo ""
-echo -e "${GREEN}[7/10] Configurando base de datos...${NC}"
-mysql -u root <<EOF
-CREATE DATABASE IF NOT EXISTS ${DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';
-GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';
-FLUSH PRIVILEGES;
-EOF
-echo "Base de datos configurada correctamente."
-
-echo ""
-echo -e "${GREEN}[8/10] Instalando DATAPOLIS PRO...${NC}"
-
-# Crear directorio de instalación
-mkdir -p $INSTALL_DIR
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-# Copiar archivos
-cp -r $SCRIPT_DIR/backend $INSTALL_DIR/
-cp -r $SCRIPT_DIR/frontend $INSTALL_DIR/
-cp -r $SCRIPT_DIR/docs $INSTALL_DIR/
-
-# Configurar Backend Laravel
-cd $INSTALL_DIR/backend
-composer install --no-dev --optimize-autoloader
-
-# Crear .env
-cp .env.example .env
-sed -i "s|APP_URL=.*|APP_URL=http://${SERVER_NAME}|g" .env
-sed -i "s|DB_DATABASE=.*|DB_DATABASE=${DB_NAME}|g" .env
-sed -i "s|DB_USERNAME=.*|DB_USERNAME=${DB_USER}|g" .env
-sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=${DB_PASS}|g" .env
-
-# Generar key y migrar
-php artisan key:generate
-php artisan migrate --seed --force
-php artisan storage:link
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
-# Configurar Frontend
-cd $INSTALL_DIR/frontend
-npm install
-npm run build
-
-echo ""
-echo -e "${GREEN}[9/10] Configurando Nginx...${NC}"
-
-cat > /etc/nginx/sites-available/datapolis <<EOF
-server {
-    listen 80;
-    server_name ${SERVER_NAME};
-    root ${INSTALL_DIR}/backend/public;
-    index index.php index.html;
-
-    client_max_body_size 100M;
-
-    # Frontend estático (React build)
-    location /app {
-        alias ${INSTALL_DIR}/frontend/dist;
-        try_files \$uri \$uri/ /app/index.html;
-    }
-
-    # API Laravel
-    location / {
-        try_files \$uri \$uri/ /index.php?\$query_string;
-    }
-
-    location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
-        include fastcgi_params;
-        fastcgi_read_timeout 300;
-    }
-
-    location ~ /\.(?!well-known).* {
-        deny all;
-    }
-
-    # Cache de assets
-    location ~* \.(jpg|jpeg|png|gif|ico|css|js|woff|woff2)$ {
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
+# Funciones de utilidad
+log() {
+    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')]${NC} $1" | tee -a "$LOG_FILE"
 }
-EOF
 
-# Activar sitio
-ln -sf /etc/nginx/sites-available/datapolis /etc/nginx/sites-enabled/
-rm -f /etc/nginx/sites-enabled/default
-nginx -t
-systemctl restart nginx
+error() {
+    echo -e "${RED}[ERROR]${NC} $1" | tee -a "$LOG_FILE"
+    exit 1
+}
 
-echo ""
-echo -e "${GREEN}[10/10] Configurando permisos...${NC}"
-chown -R www-data:www-data $INSTALL_DIR
-chmod -R 755 $INSTALL_DIR
-chmod -R 775 $INSTALL_DIR/backend/storage
-chmod -R 775 $INSTALL_DIR/backend/bootstrap/cache
+warn() {
+    echo -e "${YELLOW}[WARN]${NC} $1" | tee -a "$LOG_FILE"
+}
 
-# Configurar cron para Laravel
-(crontab -l 2>/dev/null | grep -v "artisan schedule:run"; echo "* * * * * cd ${INSTALL_DIR}/backend && php artisan schedule:run >> /dev/null 2>&1") | crontab -
+info() {
+    echo -e "${CYAN}[INFO]${NC} $1" | tee -a "$LOG_FILE"
+}
 
-echo ""
-echo -e "${BLUE}╔═══════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║           ✅ INSTALACIÓN COMPLETADA EXITOSAMENTE              ║${NC}"
-echo -e "${BLUE}╚═══════════════════════════════════════════════════════════════╝${NC}"
-echo ""
-echo -e "${YELLOW}Acceso al sistema:${NC}"
-echo -e "  URL: ${GREEN}http://${SERVER_NAME}${NC}"
-echo ""
-echo -e "${YELLOW}Credenciales por defecto:${NC}"
-echo -e "  Email:    ${GREEN}admin@datapolis.cl${NC}"
-echo -e "  Password: ${GREEN}DataPolis2025!${NC}"
-echo ""
-echo -e "${RED}⚠️  IMPORTANTE: Cambie la contraseña después del primer login${NC}"
-echo ""
-echo -e "${YELLOW}Para SSL gratuito con Let's Encrypt:${NC}"
-echo "  apt install -y certbot python3-certbot-nginx"
-echo "  certbot --nginx -d ${SERVER_NAME}"
-echo ""
-echo -e "${YELLOW}Logs:${NC}"
-echo "  Laravel: tail -f ${INSTALL_DIR}/backend/storage/logs/laravel.log"
-echo "  Nginx:   tail -f /var/log/nginx/error.log"
-echo ""
-echo -e "${BLUE}Documentación: ${INSTALL_DIR}/docs/${NC}"
-echo ""
+# Verificar privilegios de root
+check_root() {
+    if [ "$EUID" -ne 0 ]; then
+        error "Este script debe ejecutarse con privilegios de root (sudo)"
+    fi
+}
+
+# Mostrar banner
+show_banner() {
+    clear
+    echo -e "${BLUE}"
+    echo "╔════════════════════════════════════════════════════════════════╗"
+    echo "║                                                                ║"
+    echo "║         DATAPOLIS PRO v2.5 - Sistema de Instalación           ║"
+    echo "║       Sistema de Gestión Integral para Condominios            ║"
+    echo "║                  © 2025 DATAPOLIS SpA                         ║"
+    echo "║                                                                ║"
+    echo "╚════════════════════════════════════════════════════════════════╝"
+    echo -e "${NC}"
+    echo ""
+}
+
+# Solicitar tipo de instalación
+prompt_install_type() {
+    echo -e "${YELLOW}Seleccione el tipo de instalación:${NC}"
+    echo "  1) Producción (Servidor Linux completo)"
+    echo "  2) Desarrollo (Configuración local)"
+    echo ""
+
+    while true; do
+        read -p "Opción (1 o 2): " INSTALL_TYPE
+        if [ "$INSTALL_TYPE" = "1" ] || [ "$INSTALL_TYPE" = "2" ]; then
+            break
+        fi
+        echo -e "${RED}Opción inválida. Ingrese 1 o 2${NC}"
+    done
+}
+
+# Solicitar configuración SSL
+prompt_ssl_config() {
+    echo ""
+    echo -e "${YELLOW}¿Desea configurar SSL/HTTPS?${NC}"
+    echo "  s) Sí, instalar Let's Encrypt"
+    echo "  n) No, usar HTTP"
+    echo ""
+
+    while true; do
+        read -p "Opción (s o n): " INSTALL_SSL
+        if [ "$INSTALL_SSL" = "s" ] || [ "$INSTALL_SSL" = "n" ]; then
+            break
+        fi
+        echo -e "${RED}Opción inválida. Ingrese s o n${NC}"
+    done
+}
+
+# Solicitar nombre del servidor
+prompt_server_name() {
+    echo ""
+    echo -e "${YELLOW}Nombre del servidor / Dominio:${NC}"
+    echo "Ejemplos: datapolis.cl, datapolis.com, localhost"
+    echo ""
+
+    while true; do
+        read -p "Nombre de servidor: " SERVER_NAME
+        if [ ! -z "$SERVER_NAME" ]; then
+            break
+        fi
+        echo -e "${RED}El nombre del servidor no puede estar vacío${NC}"
+    done
+}
+
+# Instalar dependencias del sistema
+install_dependencies() {
+    info "Actualizando repositorios del sistema..."
+    apt-get update -qq || error "Error al actualizar repositorios"
+
+    if [ "$INSTALL_TYPE" = "1" ]; then
+        info "Instalando dependencias de producción..."
+        apt-get install -y \
+            curl wget git vim htop \
+            software-properties-common \
+            apt-transport-https ca-certificates \
+            > /dev/null 2>&1 || error "Error instalando dependencias básicas"
+
+        info "Instalando PHP ${PHP_VERSION}..."
+        add-apt-repository ppa:ondrej/php -y > /dev/null 2>&1
+        apt-get update -qq
+        apt-get install -y \
+            php${PHP_VERSION}-fpm \
+            php${PHP_VERSION}-cli \
+            php${PHP_VERSION}-mysql \
+            php${PHP_VERSION}-redis \
+            php${PHP_VERSION}-xml \
+            php${PHP_VERSION}-curl \
+            php${PHP_VERSION}-mbstring \
+            php${PHP_VERSION}-zip \
+            > /dev/null 2>&1 || error "Error instalando PHP"
+
+        info "Instalando Node.js ${NODE_VERSION}..."
+        curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - > /dev/null 2>&1
+        apt-get install -y nodejs > /dev/null 2>&1 || error "Error instalando Node.js"
+
+        info "Instalando Nginx..."
+        apt-get install -y nginx > /dev/null 2>&1 || error "Error instalando Nginx"
+
+        info "Instalando MySQL Server..."
+        apt-get install -y mysql-server > /dev/null 2>&1 || error "Error instalando MySQL"
+
+        info "Instalando Redis..."
+        apt-get install -y redis-server > /dev/null 2>&1 || error "Error instalando Redis"
+
+        if [ "$INSTALL_SSL" = "s" ]; then
+            info "Instalando Certbot para SSL..."
+            apt-get install -y certbot python3-certbot-nginx > /dev/null 2>&1 || error "Error instalando Certbot"
+        fi
+    else
+        info "Instalando dependencias de desarrollo..."
+        apt-get install -y \
+            curl wget git vim \
+            build-essential \
+            > /dev/null 2>&1 || error "Error instalando dependencias básicas"
+    fi
+
+    log "Dependencias instaladas correctamente"
+}
+
+# Crear estructura de directorios
+setup_directories() {
+    info "Creando estructura de directorios..."
+
+    mkdir -p "$INSTALL_DIR/backend"
+    mkdir -p "$INSTALL_DIR/frontend"
+    mkdir -p "$INSTALL_DIR/docs"
+    mkdir -p "$INSTALL_DIR/logs"
+    mkdir -p "$INSTALL_DIR/storage"
+
+    chmod -R 755 "$INSTALL_DIR"
+    log "Directorios creados en ${INSTALL_DIR}"
+}
+
+# Configurar servicios (solo producción)
+setup_services() {
+    if [ "$INSTALL_TYPE" != "1" ]; then
+        return
+    fi
+
+    info "Configurando servicios del sistema..."
+
+    # Iniciar servicios
+    systemctl enable php${PHP_VERSION}-fpm
+    systemctl start php${PHP_VERSION}-fpm
+
+    systemctl enable nginx
+    systemctl start nginx
+
+    systemctl enable mysql
+    systemctl start mysql
+
+    systemctl enable redis-server
+    systemctl start redis-server
+
+    log "Servicios configurados y activados"
+}
+
+# Configurar SSL
+setup_ssl() {
+    if [ "$INSTALL_TYPE" = "1" ] && [ "$INSTALL_SSL" = "s" ]; then
+        info "Configurando SSL para ${SERVER_NAME}..."
+
+        certbot certonly --nginx -d "${SERVER_NAME}" --non-interactive --agree-tos -m admin@${SERVER_NAME} 2>/dev/null || \
+            warn "No se pudo configurar SSL automáticamente. Ejecute: certbot --nginx -d ${SERVER_NAME}"
+
+        log "Configuración SSL iniciada"
+    fi
+}
+
+# Mostrar mensaje de finalización
+show_completion() {
+    echo ""
+    echo -e "${BLUE}==============================================================${NC}"
+    echo -e "${GREEN}           ✅ INSTALACIÓN COMPLETADA EXITOSAMENTE              ${NC}"
+    echo -e "${BLUE}==============================================================${NC}"
+    echo ""
+    echo -e "${YELLOW}Acceso al sistema:${NC}"
+
+    if [ "$INSTALL_TYPE" = "1" ] && [ "$INSTALL_SSL" = "s" ]; then
+        echo -e "  URL: ${GREEN}https://${SERVER_NAME}${NC}"
+    else
+        echo -e "  URL: ${GREEN}http://${SERVER_NAME}${NC}"
+    fi
+
+    echo ""
+    echo -e "${YELLOW}Credenciales por defecto:${NC}"
+    echo -e "  Email:    ${GREEN}admin@datapolis.cl${NC}"
+    echo -e "  Password: ${GREEN}DataPolis2025!${NC}"
+    echo ""
+    echo -e "${RED}⚠️  IMPORTANTE: Cambie la contraseña después del primer login${NC}"
+    echo ""
+
+    if [ "$INSTALL_TYPE" = "1" ]; then
+        echo -e "${YELLOW}Servicios:${NC}"
+        echo "  Backend: systemctl status php${PHP_VERSION}-fpm"
+        echo "  Queue: systemctl status datapolis-queue"
+        echo "  Nginx: systemctl status nginx"
+        echo "  MySQL: systemctl status mysql"
+        echo "  Redis: systemctl status redis-server"
+        echo ""
+    fi
+
+    echo -e "${YELLOW}Logs:${NC}"
+    echo "  Laravel: tail -f ${INSTALL_DIR}/backend/storage/logs/laravel.log"
+    echo "  Nginx: tail -f /var/log/nginx/error.log"
+    echo "  Instalación: cat $LOG_FILE"
+    echo ""
+    echo -e "${BLUE}Documentación: ${INSTALL_DIR}/docs/${NC}"
+    echo ""
+
+    if [ "$INSTALL_TYPE" != "1" ] && [ "$INSTALL_SSL" != "s" ]; then
+        echo -e "${YELLOW}Para instalar SSL más tarde:${NC}"
+        echo "  apt install -y certbot python3-certbot-nginx"
+        echo "  certbot --nginx -d ${SERVER_NAME}"
+        echo ""
+    fi
+}
+
+# Función principal
+main() {
+    check_root
+    show_banner
+
+    prompt_install_type
+    prompt_ssl_config
+    prompt_server_name
+
+    echo ""
+    echo -e "${YELLOW}Iniciando instalación con las siguientes opciones:${NC}"
+    echo "  Tipo: $([ "$INSTALL_TYPE" = "1" ] && echo "Producción" || echo "Desarrollo")"
+    echo "  SSL: $([ "$INSTALL_SSL" = "s" ] && echo "Habilitado" || echo "Deshabilitado")"
+    echo "  Servidor: $SERVER_NAME"
+    echo ""
+
+    read -p "¿Desea continuar? (s/n): " CONFIRM
+    if [ "$CONFIRM" != "s" ]; then
+        info "Instalación cancelada"
+        exit 0
+    fi
+
+    echo ""
+    install_dependencies
+    setup_directories
+    setup_services
+    setup_ssl
+
+    show_completion
+}
+
+main "$@"

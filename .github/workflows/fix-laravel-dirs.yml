@@ -1,0 +1,89 @@
+name: Fix Laravel Cache Directories
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-directories:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Create Laravel directories
+        run: |
+          mkdir -p backend/bootstrap/cache
+          mkdir -p backend/storage/framework/{cache,sessions,views}
+          mkdir -p backend/storage/logs
+          mkdir -p backend/storage/app/public
+          
+          touch backend/bootstrap/cache/.gitkeep
+          touch backend/storage/framework/cache/.gitkeep
+          touch backend/storage/framework/sessions/.gitkeep
+          touch backend/storage/framework/views/.gitkeep
+          touch backend/storage/logs/.gitkeep
+          touch backend/storage/app/public/.gitkeep
+      
+      - name: Commit changes
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add backend/bootstrap backend/storage
+          git commit -m "fix: add Laravel cache directories"
+          git push
+```
+
+5. **Click "Commit changes"**
+
+---
+
+### **PASO 2: Ejecutar el Workflow**
+
+1. **Ir a la pestaña "Actions"** (arriba en tu repo)
+
+2. **Click en "Fix Laravel Cache Directories"** (lado izquierdo)
+
+3. **Click en "Run workflow"** (botón a la derecha)
+
+4. **Click en "Run workflow"** (botón verde que aparece)
+
+5. **Esperar 30 segundos** ⏱️
+
+6. **Verás un ✅ verde cuando termine**
+
+---
+
+### **PASO 3: Verificar**
+
+1. Railway desplegará automáticamente en 2-3 minutos
+
+2. Comparte el nuevo log cuando termine
+
+---
+
+## 🎬 Video Mental del Proceso
+```
+GitHub.com
+    ↓
+Add file → Create new file
+    ↓
+Nombre: .github/workflows/fix-laravel-dirs.yml
+    ↓
+Pegar contenido YAML
+    ↓
+Commit changes
+    ↓
+Ir a pestaña Actions
+    ↓
+Click "Fix Laravel Cache Directories"
+    ↓
+Click "Run workflow" (derecha)
+    ↓
+Click "Run workflow" (verde)
+    ↓
+Esperar 30 segundos
+    ↓
+✅ Listo!

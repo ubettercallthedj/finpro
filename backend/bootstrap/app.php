@@ -20,8 +20,34 @@ return Application::configure(basePath: dirname(__DIR__))
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
             'role' => \Spatie\Permission\Middlewares\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
+            'log.datos.personales' => \App\Http\Middleware\LogAccesoDatosPersonales::class,
+        ]);
+
+        // Aplicar middleware de logs automáticamente a rutas API
+        $middleware->appendToGroup('api', [
+            \App\Http\Middleware\LogAccesoDatosPersonales::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Manejo personalizado de excepciones
+        $exceptions->render(function (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Registro no encontrado',
+                'error' => 'NOT_FOUND'
+            ], 404);
+        });
+
+        $exceptions->render(function (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
+        });
+
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e) {
+            return response()->json([
+                'message' => 'No autenticado',
+                'error' => 'UNAUTHENTICATED'
+            ], 401);
+        });
     })->create();

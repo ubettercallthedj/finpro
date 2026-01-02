@@ -1,264 +1,373 @@
-# DATAPOLIS PRO v2.5
+# DATAPOLIS PRO - Frontend
 
-## Sistema de Gestión Integral para Condominios
+Sistema de administración de propiedades inmobiliarias para empresas en Chile.
 
-**Plataforma PropTech/FinTech para administración de copropiedades en Chile**
+## 🚀 Tecnologías
 
----
+- **React 18.2** con TypeScript
+- **Vite** - Build tool
+- **TailwindCSS** - Estilos
+- **React Router v6** - Navegación
+- **TanStack Query** - State management y data fetching
+- **Axios** - HTTP client
+- **Chart.js** - Gráficos
+- **React Hot Toast** - Notificaciones
 
-## 🚀 Instalación Rápida
+## 📋 Prerequisitos
 
-### Opción 1: Instalación Automatizada (Recomendada)
+- Node.js >= 18.0.0
+- npm >= 9.0.0 o yarn >= 1.22.0
+
+## 🔧 Instalación
 
 ```bash
-# 1. Subir el ZIP al servidor
-scp datapolis-pro-v2.5-completo.zip root@TU_IP:/var/www/
+# Clonar repositorio
+git clone [repository-url]
+cd datapolis-frontend
 
-# 2. Conectar al servidor
-ssh root@TU_IP
-
-# 3. Descomprimir
-cd /var/www
-unzip datapolis-pro-v2.5-completo.zip
-
-# 4. Ejecutar instalador
-cd datapolis-pro-v2.5
-chmod +x install.sh
-./install.sh
-```
-
-### Opción 2: Instalación Manual
-
-Ver el archivo `docs/DATAPOLIS_GUIA_DESPLIEGUE_v2.5.md` para instrucciones detalladas.
-
----
-
-## 📋 Requisitos del Sistema
-
-| Componente | Mínimo | Recomendado |
-|------------|--------|-------------|
-| **RAM** | 2 GB | 4 GB |
-| **CPU** | 1 vCPU | 2 vCPU |
-| **Disco** | 25 GB SSD | 50 GB NVMe |
-| **SO** | Ubuntu 22.04 LTS | Ubuntu 24.04 LTS |
-
-### Software Requerido
-- PHP 8.2+ con extensiones: mysql, xml, mbstring, curl, zip, gd, bcmath
-- MySQL 8.0+ o MariaDB 10.6+
-- Nginx o Apache
-- Composer 2.x
-- Node.js 18+
-
----
-
-## 🔑 Credenciales por Defecto
-
-| Campo | Valor |
-|-------|-------|
-| **URL** | http://TU_IP |
-| **Email** | admin@datapolis.cl |
-| **Password** | DataPolis2025! |
-
-⚠️ **IMPORTANTE:** Cambiar la contraseña inmediatamente después del primer login.
-
----
-
-## 📁 Estructura del Proyecto
-
-```
-datapolis-pro-v2.5/
-├── backend/                 # Laravel 11 API
-│   ├── app/
-│   │   ├── Http/Controllers/Api/
-│   │   └── Models/
-│   ├── database/migrations/
-│   ├── routes/
-│   └── resources/views/pdf/
-├── frontend/                # React + Vite + TypeScript
-│   ├── src/
-│   │   ├── pages/
-│   │   ├── components/
-│   │   └── services/
-│   └── package.json
-├── docs/                    # Documentación completa
-│   ├── DATAPOLIS_API_REFERENCE_v2.5.yaml
-│   ├── DATAPOLIS_MANUAL_USUARIO_v2.5.md
-│   └── ...
-├── install.sh              # Script de instalación
-└── README.md               # Este archivo
-```
-
----
-
-## 🏛️ Cumplimiento Legal
-
-| Ley | Descripción | Estado |
-|-----|-------------|--------|
-| **Ley 21.442** | Copropiedad Inmobiliaria | ✅ Completo |
-| **Ley 21.713** | Distribución de Ingresos | ✅ Completo |
-| **Ley 21.719** | Protección de Datos Personales | ✅ Completo |
-| **Código del Trabajo** | Liquidaciones de sueldo | ✅ Completo |
-
----
-
-## 📊 Módulos Incluidos
-
-1. **Dashboard** - Estadísticas y alertas
-2. **Edificios/Unidades** - Gestión de propiedades
-3. **Gastos Comunes** - Boletas, pagos, morosidad
-4. **Arriendos** - Contratos telecom (antenas)
-5. **Distribución** - Reparto ingresos (Art. 17 N°3 LIR)
-6. **RRHH** - Empleados y liquidaciones
-7. **Contabilidad** - Plan cuentas, asientos, balance
-8. **Reuniones** - Asambleas telemáticas (Jitsi)
-9. **Asistente Legal** - Consultas y oficios
-10. **Protección de Datos** - ARCO+, consentimientos
-11. **Reportes Tributarios** - DJ, certificados, F22
-
----
-
-## 🆘 Soporte
-
-- **Email:** soporte@datapolis.cl
-- **Documentación:** `/docs/`
-
----
-
-© 2025 DATAPOLIS SpA - Todos los derechos reservados
-
-[![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=flat&logo=laravel)](https://laravel.com)
-[![React](https://img.shields.io/badge/React-18.x-61DAFB?style=flat&logo=react)](https://reactjs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org)
-[![License](https://img.shields.io/badge/License-Proprietary-red)](LICENSE)
-
----
-
-## 🎯 Características Principales
-
-### Gestión Operativa
-- ✅ **Gastos Comunes**: Boletas, pagos, morosidad, intereses
-- ✅ **Arriendos**: Contratos, facturación, UF automática
-- ✅ **Distribución**: Reparto proporcional Ley 21.713
-- ✅ **RRHH**: Liquidaciones, cotizaciones, finiquitos
-
-### Contabilidad y Tributario
-- ✅ **Balance General**: Formato SII/F22
-- ✅ **Estado de Resultados**: Con distribución Art. 17 N°3
-- ✅ **DJ 1887**: Generación CSV para SII
-- ✅ **Certificados de Renta**: Individual y consolidado
-
-### Cumplimiento Legal
-- ✅ **Ley 21.442**: Copropiedad inmobiliaria
-- ✅ **Ley 21.713**: Distribución de arriendos
-- ✅ **Ley 21.719**: Protección de datos personales
-- ✅ **Código del Trabajo**: Remuneraciones
-
-### Gobierno Corporativo
-- ✅ **Asambleas Telemáticas**: Jitsi Meet integrado
-- ✅ **Votaciones Ponderadas**: Por prorrateo
-- ✅ **Actas Automáticas**: PDF con firmas
-
----
-
-## 🚀 Instalación Rápida
-
-### Requisitos
-- PHP 8.2+
-- Node.js 18+
-- MySQL 8.0+
-- Redis 7+
-- Composer 2+
-
-### Backend
-```bash
-cd backend
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan migrate --seed
-php artisan serve
-```
-
-### Frontend
-```bash
-cd frontend
+# Instalar dependencias
 npm install
-npm run dev
+
+# Copiar archivo de entorno
+cp .env.example .env
+
+# Configurar variables de entorno
+# VITE_API_URL=http://localhost:8000/api
 ```
 
----
+## 🏃 Desarrollo
 
-## 📊 Métricas del Sistema
+```bash
+# Iniciar servidor de desarrollo
+npm run dev
 
-| Componente | Cantidad |
-|------------|:--------:|
-| Tablas BD | ~95 |
-| Endpoints API | ~160 |
-| Páginas Frontend | 15 |
-| Modelos | 30+ |
-| Líneas de código | ~18,000 |
+# Abrir en navegador
+# http://localhost:5173
+```
 
----
+## 🏗️ Build
+
+```bash
+# Build de producción
+npm run build
+
+# Preview del build
+npm run preview
+```
+
+## 🧪 Testing
+
+```bash
+# Ejecutar tests unitarios
+npm run test
+
+# Tests con coverage
+npm run test:coverage
+
+# Tests E2E con Playwright
+npm run test:e2e
+```
+
+## 📝 Linting
+
+```bash
+# Ejecutar linter
+npm run lint
+
+# Fix automático
+npm run lint:fix
+
+# Formatear código
+npm run format
+```
 
 ## 📁 Estructura del Proyecto
 
 ```
-datapolis-pro/
-├── backend/                # Laravel 11
-│   ├── app/
-│   │   ├── Http/Controllers/Api/
-│   │   ├── Models/
-│   │   └── Services/
-│   ├── database/
-│   │   ├── migrations/     # 8 migraciones
-│   │   └── seeders/
-│   ├── routes/
-│   └── resources/views/pdf/
-├── frontend/               # React 18 + Vite
-│   └── src/
-│       ├── pages/          # 15 páginas
-│       ├── components/
-│       └── services/
-└── docs/                   # Documentación
+frontend/
+├── public/                 # Archivos estáticos
+│   └── favicon.svg
+├── src/
+│   ├── components/        # Componentes reutilizables
+│   │   ├── ui/           # Componentes UI básicos
+│   │   └── layouts/      # Layouts
+│   ├── context/          # React Context
+│   │   └── AuthContext.tsx
+│   ├── hooks/            # Custom hooks
+│   ├── pages/            # Páginas de la aplicación
+│   │   ├── DashboardPage.tsx
+│   │   ├── EdificiosPage.tsx
+│   │   ├── GastosComunesPage.tsx
+│   │   ├── ArriendosPage.tsx
+│   │   ├── DistribucionPage.tsx
+│   │   ├── RRHHPage.tsx
+│   │   ├── ContabilidadPage.tsx
+│   │   ├── ReunionesPage.tsx
+│   │   ├── AsistenteLegalPage.tsx
+│   │   ├── ReportesPage.tsx
+│   │   ├── ProteccionDatosPage.tsx
+│   │   ├── ReportesTributariosPage.tsx
+│   │   └── ConfiguracionPage.tsx
+│   ├── services/         # Servicios y API
+│   │   └── api.ts
+│   ├── types/            # TypeScript types
+│   ├── utils/            # Utilidades
+│   ├── App.tsx           # Componente principal
+│   ├── main.tsx          # Entry point
+│   └── index.css         # Estilos globales
+├── .eslintrc.json        # Configuración ESLint
+├── .prettierrc           # Configuración Prettier
+├── tailwind.config.js    # Configuración Tailwind
+├── tsconfig.json         # Configuración TypeScript
+├── vite.config.ts        # Configuración Vite
+└── package.json
 ```
 
----
+## 🎨 Convenciones de Código
 
-## 📚 Documentación
+### Componentes
+- Usar PascalCase para nombres de componentes
+- Un componente por archivo
+- Preferir function components sobre class components
+- Usar TypeScript interfaces para props
 
-| Documento | Descripción |
-|-----------|-------------|
-| [API Reference](docs/DATAPOLIS_API_REFERENCE_v2.5.yaml) | OpenAPI 3.0 |
-| [Manual Usuario](docs/DATAPOLIS_MANUAL_USUARIO_v2.5.md) | Guía completa |
-| [Guía Despliegue](docs/DATAPOLIS_GUIA_DESPLIEGUE_v2.5.md) | Instalación producción |
-| [Arquitectura](docs/DATAPOLIS_ARQUITECTURA_v2.5.md) | Diseño técnico |
-| [Diccionario Datos](docs/DATAPOLIS_DICCIONARIO_DATOS_v2.5.md) | Esquema BD |
-| [Cumplimiento Legal](docs/DATAPOLIS_MANUAL_CUMPLIMIENTO_LEGAL_v2.5.md) | Leyes chilenas |
+```tsx
+interface EdificioCardProps {
+  edificio: Edificio
+  onSelect: (id: number) => void
+}
 
----
+export function EdificioCard({ edificio, onSelect }: EdificioCardProps) {
+  return (
+    <div className="card">
+      {/* ... */}
+    </div>
+  )
+}
+```
 
-## 🔐 Seguridad
+### Hooks
+- Prefijo `use` para custom hooks
+- Colocar hooks al inicio del componente
+- No llamar hooks condicionalmente
 
-- Autenticación JWT (Laravel Sanctum)
-- Encriptación AES-256 datos sensibles
-- TLS 1.3 en tránsito
-- Auditoría completa de accesos
-- Cumplimiento Ley 21.719
+```tsx
+function useEdificios() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['edificios'],
+    queryFn: () => api.get('/edificios').then(r => r.data)
+  })
+  
+  return { edificios: data, isLoading, error }
+}
+```
 
----
+### Estilos
+- Usar clases de Tailwind
+- Clases personalizadas en index.css
+- Seguir mobile-first approach
 
-## 📞 Soporte
+```tsx
+<div className="card p-4 md:p-6 lg:p-8">
+  <h2 className="text-lg md:text-xl font-semibold">Título</h2>
+</div>
+```
 
-- **Email**: soporte@datapolis.cl
-- **Documentación**: https://docs.datapolis.cl
-- **Estado del servicio**: https://status.datapolis.cl
+## 🔐 Autenticación
 
----
+El sistema usa JWT tokens almacenados en localStorage (pendiente migrar a httpOnly cookies).
+
+```tsx
+// Login
+const { login } = useAuth()
+await login(email, password)
+
+// Logout
+const { logout } = useAuth()
+logout()
+
+// Verificar autenticación
+const { isAuthenticated, user } = useAuth()
+```
+
+## 📡 API Client
+
+Todas las llamadas a la API se hacen a través del cliente centralizado:
+
+```tsx
+import api from '@/services/api'
+
+// GET request
+const response = await api.get('/edificios')
+const edificios = response.data
+
+// POST request
+await api.post('/edificios', {
+  nombre: 'Edificio Demo',
+  direccion: 'Calle Principal 123'
+})
+
+// Con parámetros
+await api.get('/unidades', {
+  params: { edificio_id: 1 }
+})
+```
+
+## 🎯 React Query
+
+### Queries
+```tsx
+const { data, isLoading, error } = useQuery({
+  queryKey: ['edificios'],
+  queryFn: () => api.get('/edificios').then(r => r.data),
+  staleTime: 5 * 60 * 1000, // 5 minutos
+})
+```
+
+### Mutations
+```tsx
+const mutation = useMutation({
+  mutationFn: (data) => api.post('/edificios', data),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['edificios'] })
+    toast.success('Edificio creado')
+  },
+  onError: (error) => {
+    toast.error(error.message)
+  }
+})
+```
+
+## 🌐 Rutas
+
+| Ruta | Componente | Descripción |
+|------|-----------|-------------|
+| `/` | DashboardPage | Dashboard principal |
+| `/edificios` | EdificiosPage | Gestión de edificios |
+| `/unidades` | UnidadesPage | Gestión de unidades |
+| `/gastos-comunes` | GastosComunesPage | Gastos comunes |
+| `/arriendos` | ArriendosPage | Gestión de arriendos |
+| `/distribucion` | DistribucionPage | Distribución de ingresos |
+| `/rrhh` | RRHHPage | Recursos humanos |
+| `/contabilidad` | ContabilidadPage | Contabilidad |
+| `/reuniones` | ReunionesPage | Reuniones y asambleas |
+| `/legal` | AsistenteLegalPage | Asistente legal |
+| `/reportes` | ReportesPage | Reportes generales |
+| `/proteccion-datos` | ProteccionDatosPage | Protección de datos |
+| `/reportes-tributarios` | ReportesTributariosPage | Reportes tributarios |
+| `/configuracion` | ConfiguracionPage | Configuración |
+
+## 🐛 Debugging
+
+### React Query Devtools
+Habilitado en desarrollo:
+
+```tsx
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+
+<QueryClientProvider client={queryClient}>
+  <App />
+  <ReactQueryDevtools initialIsOpen={false} />
+</QueryClientProvider>
+```
+
+### Console Logs
+Evitar en producción. Usar en desarrollo:
+
+```tsx
+if (import.meta.env.DEV) {
+  console.log('Debug info:', data)
+}
+```
+
+## 📦 Deployment
+
+### Vercel (Recomendado)
+```bash
+npm install -g vercel
+vercel
+```
+
+### Build Manual
+```bash
+npm run build
+# Los archivos estarán en dist/
+```
+
+### Variables de Entorno en Producción
+```
+VITE_API_URL=https://api.datapolis.cl
+VITE_ENV=production
+```
+
+## 🔒 Seguridad
+
+### Mejoras Pendientes
+- [ ] Migrar de localStorage a httpOnly cookies
+- [ ] Implementar CSRF protection
+- [ ] Agregar Content Security Policy
+- [ ] Validación robusta de formularios con Zod
+- [ ] Sanitización de HTML
+
+### Buenas Prácticas
+- ✅ No almacenar datos sensibles en state
+- ✅ Validar inputs del usuario
+- ✅ Usar HTTPS en producción
+- ✅ Sanitizar contenido HTML dinámico
+- ✅ Implementar rate limiting
+
+## 📊 Performance
+
+### Métricas Objetivo
+- First Contentful Paint: < 1.5s
+- Time to Interactive: < 3.5s
+- Lighthouse Score: > 90
+
+### Optimizaciones Implementadas
+- ✅ Code splitting por ruta
+- ✅ Lazy loading de componentes
+- ✅ React Query caching
+- ✅ Memoización con React.memo
+- ✅ Virtualización de listas (pendiente)
+
+## 🤝 Contribución
+
+1. Fork el proyecto
+2. Crear feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a branch (`git push origin feature/AmazingFeature`)
+5. Abrir Pull Request
+
+### Commits
+Seguir Conventional Commits:
+```
+feat: nueva funcionalidad
+fix: corrección de bug
+docs: cambios en documentación
+style: formateo, punto y coma faltantes, etc
+refactor: refactorización de código
+test: agregar tests
+chore: tareas de mantenimiento
+perf: mejora de performance
+```
 
 ## 📄 Licencia
 
-Copyright © 2025 DATAPOLIS SpA. Todos los derechos reservados.
+Propietario - DATAPOLIS PRO © 2026
+
+## 👥 Equipo
+
+- Desarrollo Frontend: [Tu Nombre]
+- Desarrollo Backend: [Nombre]
+- UI/UX: [Nombre]
+- QA: [Nombre]
+
+## 📞 Soporte
+
+- Email: soporte@datapolis.cl
+- Docs: https://docs.datapolis.cl
+- Issues: GitHub Issues
 
 ---
 
-**Desarrollado con ❤️ para la industria inmobiliaria chilena**
+**Última actualización**: 1 de enero de 2026

@@ -82,16 +82,16 @@ class GastosComunesController extends Controller
             ->orderBy('unidades.numero')
             ->get();
 
-        $periodo->boletas = $boletas;
-        $periodo->resumen = [
-            'total_boletas' => $boletas->count(),
-            'total_emitido' => $boletas->sum('total_a_pagar'),
-            'total_pagado' => $boletas->sum('total_abonos'),
-            'total_pendiente' => $boletas->sum(fn($b) => $b->total_a_pagar - $b->total_abonos),
-        ];
+    $boletasPendientes = DB::table('boletas_gc')
+    ->join('periodos_gc', 'boletas_gc.periodo_id', '=', 'periodos_gc.id')
+    ->where('boletas_gc.unidad_id', $request->unidad_id)
+    ->whereIn('boletas_gc.estado', ['pendiente', 'parcial'])
+    ->where('boletas_gc.fecha_vencimiento', '<=', $fechaCorte)
+    ->selectRaw('SUM(boletas_gc.total_a_pagar - COALESCE(boletas_gc.total_abonos, 0)) as deuda_gc, SUM(boletas_gc.total_fondo_reserva) as deuda_fondo, SUM(boletas_gc.total_intereses) as deuda_intereses
+    ')
+    ->first();
 
-        return response()->json($periodo);
-    }
+// NOTA: Verificar schema de tabla boletas_gc. Si el campo es 'total_pagado' en lugar de 'total_abonos', cambiar TODAS las referencias
 
     public function generarBoletas(int $periodoId): JsonResponse
     {

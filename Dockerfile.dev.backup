@@ -1,0 +1,32 @@
+# =====================================================
+# DATAPOLIS PRO - Frontend Development Dockerfile
+# =====================================================
+
+FROM node:20-alpine
+
+LABEL maintainer="DATAPOLIS SpA"
+LABEL version="2.5.0"
+LABEL description="Development environment for React/Vite frontend"
+
+# Install dependencies for development
+RUN apk add --no-cache \
+    git \
+    curl \
+    wget
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies (including dev dependencies)
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Expose Vite dev server port
+EXPOSE 5173
+
+# Start development server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

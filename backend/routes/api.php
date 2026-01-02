@@ -1,17 +1,37 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\*;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\EdificioController;
+use App\Http\Controllers\Api\UnidadController;
+use App\Http\Controllers\Api\PersonaController;
+use App\Http\Controllers\Api\GastosComunesController;
+use App\Http\Controllers\Api\ArriendosController;
+use App\Http\Controllers\Api\DistribucionController;
+use App\Http\Controllers\Api\RRHHController;
+use App\Http\Controllers\Api\ContabilidadController;
+use App\Http\Controllers\Api\ReunionesController;
+use App\Http\Controllers\Api\AsistenteLegalController;
+use App\Http\Controllers\Api\ProteccionDatosController;
+use App\Http\Controllers\Api\ReportesTributariosController;
 
 // Health check
-Route::get('/health', fn() => response()->json(['status' => 'ok', 'timestamp' => now()]));
+Route::get('/health', fn() => response()->json([
+    'status' => 'ok', 
+    'timestamp' => now(),
+    'app' => 'DATAPOLIS PRO',
+    'version' => '1.0.0'
+]));
 
-// Auth routes
+// ========================================
+// AUTH ROUTES (Sin autenticación)
+// ========================================
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     
+    // Rutas autenticadas
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user', [AuthController::class, 'user']);
         Route::post('/logout', [AuthController::class, 'logout']);
@@ -19,8 +39,11 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-// Protected routes
+// ========================================
+// RUTAS PROTEGIDAS
+// ========================================
 Route::middleware('auth:sanctum')->group(function () {
+    
     // Dashboard
     Route::prefix('dashboard')->group(function () {
         Route::get('/stats', [DashboardController::class, 'stats']);
@@ -31,13 +54,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Edificios
     Route::apiResource('edificios', EdificioController::class);
-    Route::get('edificios/{edificio}/unidades', [EdificioController::class, 'unidades']);
-    Route::get('edificios/{edificio}/estadisticas', [EdificioController::class, 'estadisticas']);
+    Route::get('edificios/{id}/unidades', [EdificioController::class, 'unidades']);
+    Route::get('edificios/{id}/estadisticas', [EdificioController::class, 'estadisticas']);
 
     // Unidades
     Route::apiResource('unidades', UnidadController::class);
-    Route::get('unidades/{unidad}/boletas', [UnidadController::class, 'boletas']);
-    Route::get('unidades/{unidad}/estado-cuenta', [UnidadController::class, 'estadoCuenta']);
+    Route::get('unidades/{id}/boletas', [UnidadController::class, 'boletas']);
+    Route::get('unidades/{id}/estado-cuenta', [UnidadController::class, 'estadoCuenta']);
 
     // Personas
     Route::apiResource('personas', PersonaController::class);
@@ -46,13 +69,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('gastos-comunes')->group(function () {
         Route::get('/periodos', [GastosComunesController::class, 'periodos']);
         Route::post('/periodos', [GastosComunesController::class, 'crearPeriodo']);
-        Route::get('/periodos/{periodo}', [GastosComunesController::class, 'showPeriodo']);
-        Route::post('/periodos/{periodo}/generar-boletas', [GastosComunesController::class, 'generarBoletas']);
-        Route::post('/periodos/{periodo}/cerrar', [GastosComunesController::class, 'cerrarPeriodo']);
+        Route::get('/periodos/{id}', [GastosComunesController::class, 'showPeriodo']);
+        Route::post('/periodos/{id}/generar-boletas', [GastosComunesController::class, 'generarBoletas']);
+        Route::post('/periodos/{id}/cerrar', [GastosComunesController::class, 'cerrarPeriodo']);
         
         Route::get('/boletas', [GastosComunesController::class, 'boletas']);
-        Route::get('/boletas/{boleta}', [GastosComunesController::class, 'showBoleta']);
-        Route::get('/boletas/{boleta}/pdf', [GastosComunesController::class, 'boletaPdf']);
+        Route::get('/boletas/{id}', [GastosComunesController::class, 'showBoleta']);
+        Route::get('/boletas/{id}/pdf', [GastosComunesController::class, 'boletaPdf']);
         
         Route::get('/pagos', [GastosComunesController::class, 'pagos']);
         Route::post('/pagos', [GastosComunesController::class, 'registrarPago']);
@@ -65,13 +88,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('arriendos')->group(function () {
         Route::get('/contratos', [ArriendosController::class, 'contratos']);
         Route::post('/contratos', [ArriendosController::class, 'crearContrato']);
-        Route::get('/contratos/{contrato}', [ArriendosController::class, 'showContrato']);
-        Route::put('/contratos/{contrato}', [ArriendosController::class, 'updateContrato']);
+        Route::get('/contratos/{id}', [ArriendosController::class, 'showContrato']);
+        Route::put('/contratos/{id}', [ArriendosController::class, 'updateContrato']);
         
         Route::get('/facturas', [ArriendosController::class, 'facturas']);
         Route::post('/facturas/generar', [ArriendosController::class, 'generarFacturas']);
-        Route::get('/facturas/{factura}', [ArriendosController::class, 'showFactura']);
-        Route::get('/facturas/{factura}/pdf', [ArriendosController::class, 'facturaPdf']);
+        Route::get('/facturas/{id}', [ArriendosController::class, 'showFactura']);
+        Route::get('/facturas/{id}/pdf', [ArriendosController::class, 'facturaPdf']);
         
         Route::get('/arrendatarios', [ArriendosController::class, 'arrendatarios']);
         Route::post('/arrendatarios', [ArriendosController::class, 'crearArrendatario']);
@@ -81,25 +104,29 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('distribucion')->group(function () {
         Route::get('/', [DistribucionController::class, 'index']);
         Route::post('/', [DistribucionController::class, 'crear']);
-        Route::get('/{distribucion}', [DistribucionController::class, 'show']);
-        Route::post('/{distribucion}/procesar', [DistribucionController::class, 'procesar']);
-        Route::post('/{distribucion}/aprobar', [DistribucionController::class, 'aprobar']);
-        Route::get('/{distribucion}/detalle', [DistribucionController::class, 'detalle']);
+        Route::get('/{id}', [DistribucionController::class, 'show']);
+        Route::post('/{id}/procesar', [DistribucionController::class, 'procesar']);
+        Route::post('/{id}/aprobar', [DistribucionController::class, 'aprobar']);
+        Route::get('/{id}/detalle', [DistribucionController::class, 'detalle']);
         
         Route::get('/certificados', [DistribucionController::class, 'certificados']);
         Route::post('/certificados/generar-masivo', [DistribucionController::class, 'generarCertificadosMasivo']);
-        Route::get('/certificados/{certificado}/pdf', [DistribucionController::class, 'certificadoPdf']);
+        Route::get('/certificados/{id}/pdf', [DistribucionController::class, 'certificadoPdf']);
     });
 
     // RRHH
     Route::prefix('rrhh')->group(function () {
-        Route::apiResource('empleados', RRHHController::class);
-        Route::get('empleados/{empleado}/liquidaciones', [RRHHController::class, 'liquidacionesEmpleado']);
+        Route::get('/empleados', [RRHHController::class, 'index']);
+        Route::post('/empleados', [RRHHController::class, 'store']);
+        Route::get('/empleados/{id}', [RRHHController::class, 'show']);
+        Route::put('/empleados/{id}', [RRHHController::class, 'update']);
+        Route::delete('/empleados/{id}', [RRHHController::class, 'destroy']);
         
         Route::get('/liquidaciones', [RRHHController::class, 'liquidaciones']);
+        Route::get('/liquidaciones/empleado/{id}', [RRHHController::class, 'liquidacionesEmpleado']);
         Route::post('/liquidaciones/generar', [RRHHController::class, 'generarLiquidacion']);
-        Route::get('/liquidaciones/{liquidacion}', [RRHHController::class, 'showLiquidacion']);
-        Route::get('/liquidaciones/{liquidacion}/pdf', [RRHHController::class, 'liquidacionPdf']);
+        Route::get('/liquidaciones/{id}', [RRHHController::class, 'showLiquidacion']);
+        Route::get('/liquidaciones/{id}/pdf', [RRHHController::class, 'liquidacionPdf']);
         
         Route::get('/afp', [RRHHController::class, 'afp']);
         Route::get('/isapres', [RRHHController::class, 'isapres']);
@@ -113,36 +140,46 @@ Route::middleware('auth:sanctum')->group(function () {
         
         Route::get('/asientos', [ContabilidadController::class, 'asientos']);
         Route::post('/asientos', [ContabilidadController::class, 'crearAsiento']);
-        Route::get('/asientos/{asiento}', [ContabilidadController::class, 'showAsiento']);
+        Route::get('/asientos/{id}', [ContabilidadController::class, 'showAsiento']);
         
         Route::get('/libro-diario', [ContabilidadController::class, 'libroDiario']);
         Route::get('/libro-mayor', [ContabilidadController::class, 'libroMayor']);
         Route::get('/balance', [ContabilidadController::class, 'balance']);
+        
+        // Balance General (reportes tributarios)
+        Route::get('/balance-general', [ReportesTributariosController::class, 'listarBalances']);
+        Route::post('/balance-general/generar', [ReportesTributariosController::class, 'generarBalanceGeneral']);
+        Route::get('/balance-general/{id}/pdf', [ReportesTributariosController::class, 'descargarBalancePdf']);
+        
+        // Estado de Resultados
+        Route::get('/estado-resultados', [ReportesTributariosController::class, 'listarEstadosResultados']);
+        Route::post('/estado-resultados/generar', [ReportesTributariosController::class, 'generarEstadoResultados']);
+        Route::get('/estado-resultados/{id}/pdf', [ReportesTributariosController::class, 'descargarEstadoResultadosPdf']);
     });
 
     // Reuniones
     Route::prefix('reuniones')->group(function () {
         Route::get('/', [ReunionesController::class, 'index']);
         Route::post('/', [ReunionesController::class, 'store']);
-        Route::get('/{reunion}', [ReunionesController::class, 'show']);
-        Route::put('/{reunion}', [ReunionesController::class, 'update']);
-        Route::delete('/{reunion}', [ReunionesController::class, 'destroy']);
+        Route::get('/{id}', [ReunionesController::class, 'show']);
+        Route::put('/{id}', [ReunionesController::class, 'update']);
+        Route::delete('/{id}', [ReunionesController::class, 'destroy']);
         
-        Route::post('/{reunion}/convocar', [ReunionesController::class, 'convocar']);
-        Route::post('/{reunion}/iniciar', [ReunionesController::class, 'iniciar']);
-        Route::post('/{reunion}/finalizar', [ReunionesController::class, 'finalizar']);
+        Route::post('/{id}/convocar', [ReunionesController::class, 'convocar']);
+        Route::post('/{id}/iniciar', [ReunionesController::class, 'iniciar']);
+        Route::post('/{id}/finalizar', [ReunionesController::class, 'finalizar']);
         
-        Route::get('/{reunion}/convocados', [ReunionesController::class, 'convocados']);
-        Route::post('/{reunion}/convocados', [ReunionesController::class, 'agregarConvocados']);
+        Route::get('/{id}/convocados', [ReunionesController::class, 'convocados']);
+        Route::post('/{id}/convocados', [ReunionesController::class, 'agregarConvocados']);
         
-        Route::get('/{reunion}/votaciones', [ReunionesController::class, 'votaciones']);
-        Route::post('/{reunion}/votaciones', [ReunionesController::class, 'crearVotacion']);
-        Route::post('/{reunion}/votaciones/{votacion}/iniciar', [ReunionesController::class, 'iniciarVotacion']);
-        Route::post('/{reunion}/votaciones/{votacion}/votar', [ReunionesController::class, 'votar']);
-        Route::post('/{reunion}/votaciones/{votacion}/cerrar', [ReunionesController::class, 'cerrarVotacion']);
+        Route::get('/{id}/votaciones', [ReunionesController::class, 'votaciones']);
+        Route::post('/{id}/votaciones', [ReunionesController::class, 'crearVotacion']);
+        Route::post('/{id}/votaciones/{votacionId}/iniciar', [ReunionesController::class, 'iniciarVotacion']);
+        Route::post('/{id}/votaciones/{votacionId}/votar', [ReunionesController::class, 'votar']);
+        Route::post('/{id}/votaciones/{votacionId}/cerrar', [ReunionesController::class, 'cerrarVotacion']);
         
-        Route::get('/{reunion}/acta', [ReunionesController::class, 'acta']);
-        Route::post('/{reunion}/acta/generar', [ReunionesController::class, 'generarActa']);
+        Route::get('/{id}/acta', [ReunionesController::class, 'acta']);
+        Route::post('/{id}/acta/generar', [ReunionesController::class, 'generarActa']);
     });
 
     // Asistente Legal
@@ -154,8 +191,8 @@ Route::middleware('auth:sanctum')->group(function () {
         
         Route::get('/oficios', [AsistenteLegalController::class, 'oficios']);
         Route::post('/oficios', [AsistenteLegalController::class, 'crearOficio']);
-        Route::get('/oficios/{oficio}', [AsistenteLegalController::class, 'showOficio']);
-        Route::get('/oficios/{oficio}/pdf', [AsistenteLegalController::class, 'oficioPdf']);
+        Route::get('/oficios/{id}', [AsistenteLegalController::class, 'showOficio']);
+        Route::get('/oficios/{id}/pdf', [AsistenteLegalController::class, 'oficioPdf']);
         
         Route::get('/plantillas', [AsistenteLegalController::class, 'plantillas']);
         Route::get('/instituciones', [AsistenteLegalController::class, 'instituciones']);
@@ -164,57 +201,68 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/certificados/generar', [AsistenteLegalController::class, 'generarCertificado']);
     });
 
-    // Reportes
-    Route::prefix('reportes')->group(function () {
-        Route::get('/resumen', [ReportesController::class, 'resumen']);
-        Route::get('/morosidad', [ReportesController::class, 'morosidad']);
-        Route::get('/recaudacion', [ReportesController::class, 'recaudacion']);
-        Route::get('/ingresos-arriendos', [ReportesController::class, 'ingresosArriendos']);
-        Route::get('/distribuciones', [ReportesController::class, 'distribuciones']);
-        Route::get('/costos-personal', [ReportesController::class, 'costosPersonal']);
-        Route::get('/exportar/{tipo}', [ReportesController::class, 'exportar']);
+    // Protección de Datos
+    Route::prefix('proteccion-datos')->group(function () {
+        Route::get('/dashboard', [ProteccionDatosController::class, 'dashboardCumplimiento']);
+        Route::get('/solicitudes', [ProteccionDatosController::class, 'listarSolicitudes']);
+        Route::put('/solicitudes/{id}', [ProteccionDatosController::class, 'procesarSolicitud']);
+        
+        Route::post('/consentimientos', [ProteccionDatosController::class, 'registrarConsentimiento']);
+        Route::post('/consentimientos/revocar', [ProteccionDatosController::class, 'revocarConsentimiento']);
+        Route::get('/consentimientos/persona/{personaId}', [ProteccionDatosController::class, 'obtenerConsentimientos']);
+        
+        Route::get('/tratamientos', [ProteccionDatosController::class, 'listarTratamientos']);
+        Route::post('/tratamientos', [ProteccionDatosController::class, 'crearTratamiento']);
+        
+        Route::get('/brechas', [ProteccionDatosController::class, 'listarBrechas']);
+        Route::post('/brechas', [ProteccionDatosController::class, 'reportarBrecha']);
+        
+        Route::post('/politicas', [ProteccionDatosController::class, 'crearPolitica']);
+        Route::post('/anonimizar', [ProteccionDatosController::class, 'anonimizarDatos']);
+        Route::get('/logs/persona/{personaId}', [ProteccionDatosController::class, 'logsAccesoPersona']);
     });
 
-    // Notificaciones
-    Route::prefix('notificaciones')->group(function () {
-        Route::get('/', [NotificacionController::class, 'index']);
-        Route::get('/no-leidas', [NotificacionController::class, 'noLeidas']);
-        Route::post('/{notificacion}/leer', [NotificacionController::class, 'marcarLeida']);
-        Route::post('/leer-todas', [NotificacionController::class, 'marcarTodasLeidas']);
+    // Reportes Tributarios
+    Route::prefix('tributario')->group(function () {
+        // Declaraciones Juradas
+        Route::get('/declaraciones-juradas', [ReportesTributariosController::class, 'listarDeclaraciones']);
+        Route::post('/declaraciones-juradas/dj1887', [ReportesTributariosController::class, 'generarDJ1887']);
+        Route::get('/declaraciones-juradas/{id}/csv', [ReportesTributariosController::class, 'descargarDJ1887Csv']);
+        
+        // Reportes consolidados
+        Route::post('/reportes/consolidado', [ReportesTributariosController::class, 'generarReporteConsolidadoDistribucion']);
+        Route::get('/reportes/contribuyente/{personaId}', [ReportesTributariosController::class, 'obtenerDetalleContribuyente']);
+        Route::get('/reportes/certificado-individual/{detalleId}/pdf', [ReportesTributariosController::class, 'descargarCertificadoIndividual']);
+        Route::get('/reportes/certificado-consolidado/{personaId}/pdf', [ReportesTributariosController::class, 'descargarCertificadoConsolidado']);
+        
+        // Certificados de deuda
+        Route::get('/certificados-deuda', [ReportesTributariosController::class, 'listarCertificadosDeuda']);
+        Route::post('/certificados-deuda/generar', [ReportesTributariosController::class, 'generarCertificadoDeuda']);
+        Route::get('/certificados-deuda/{id}/pdf', [ReportesTributariosController::class, 'descargarCertificadoDeudaPdf']);
+        
+        // Checklist cumplimiento
+        Route::post('/cumplimiento/checklist', [ReportesTributariosController::class, 'generarChecklistCumplimiento']);
+        Route::get('/cumplimiento/checklist/edificio/{edificioId}', [ReportesTributariosController::class, 'checklistEdificio']);
     });
-
-    // Configuración
-    Route::prefix('configuracion')->group(function () {
-        Route::get('/', [ConfiguracionController::class, 'index']);
-        Route::put('/', [ConfiguracionController::class, 'update']);
-    });
-
-    // Usuarios (Admin)
-    Route::prefix('usuarios')->middleware('role:admin')->group(function () {
-        Route::get('/', [UsuarioController::class, 'index']);
-        Route::post('/', [UsuarioController::class, 'store']);
-        Route::get('/{usuario}', [UsuarioController::class, 'show']);
-        Route::put('/{usuario}', [UsuarioController::class, 'update']);
-        Route::delete('/{usuario}', [UsuarioController::class, 'destroy']);
-    });
-
-    // Indicadores económicos
-    Route::get('/indicadores/uf', [IndicadoresController::class, 'uf']);
-    Route::get('/indicadores/utm', [IndicadoresController::class, 'utm']);
-    Route::get('/indicadores/todos', [IndicadoresController::class, 'todos']);
 });
 
-// Portal Copropietarios
-Route::prefix('portal')->middleware('auth:sanctum')->group(function () {
-    Route::get('/mi-unidad', [PortalController::class, 'miUnidad']);
-    Route::get('/mis-boletas', [PortalController::class, 'misBoletas']);
-    Route::get('/mi-estado-cuenta', [PortalController::class, 'miEstadoCuenta']);
-    Route::get('/mis-certificados', [PortalController::class, 'misCertificados']);
-    Route::get('/comunicados', [PortalController::class, 'comunicados']);
-    Route::get('/reuniones', [PortalController::class, 'reuniones']);
+// ========================================
+// RUTAS PÚBLICAS
+// ========================================
+
+// Ejercicio de derechos ARCO+ (sin autenticación)
+Route::prefix('privacidad')->group(function () {
+    Route::post('/derecho-acceso', [ProteccionDatosController::class, 'ejercerDerechoAcceso']);
+    Route::post('/derecho-rectificacion', [ProteccionDatosController::class, 'ejercerDerechoRectificacion']);
+    Route::post('/derecho-cancelacion', [ProteccionDatosController::class, 'ejercerDerechoCancelacion']);
+    Route::post('/derecho-oposicion', [ProteccionDatosController::class, 'ejercerDerechoOposicion']);
+    Route::post('/derecho-portabilidad', [ProteccionDatosController::class, 'ejercerDerechoPortabilidad']);
+    Route::get('/solicitud/{numero}', [ProteccionDatosController::class, 'consultarEstadoSolicitud']);
+    Route::get('/politica', [ProteccionDatosController::class, 'obtenerPoliticaVigente']);
 });
 
 // Verificación pública de certificados
+Route::get('/verificar/{codigo}', [ReportesTributariosController::class, 'verificarCertificado']);
 Route::get('/verificar-certificado/{codigo}', [AsistenteLegalController::class, 'verificarCertificado']);
 
 // Sala de reunión pública
