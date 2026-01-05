@@ -77,7 +77,7 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->foreignId('edificio_id')->constrained()->cascadeOnDelete();
             $table->foreignId('periodo_id')->constrained('periodos_gc')->cascadeOnDelete();
-            $table->foreignId('unidad_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('unidad_id')->constrained('unidades')->cascadeOnDelete();
             
             $table->string('numero_boleta', 30);
             $table->date('fecha_emision');
@@ -171,7 +171,7 @@ return new class extends Migration
         Schema::create('convenios_pago', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('unidad_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('unidad_id')->constrained('unidades')->cascadeOnDelete();
             $table->decimal('deuda_original', 15, 2);
             $table->decimal('deuda_convenida', 15, 2);
             $table->decimal('descuento', 15, 2)->default(0);
