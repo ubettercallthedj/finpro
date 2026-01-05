@@ -16,6 +16,12 @@ use App\Http\Controllers\Api\AsistenteLegalController;
 use App\Http\Controllers\Api\ProteccionDatosController;
 use App\Http\Controllers\Api\ReportesTributariosController;
 
+// Health config by Cloud and SCE
+
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok'], 200);
+});
+
 // Health check
 Route::get('/health', fn() => response()->json([
     'status' => 'ok', 
