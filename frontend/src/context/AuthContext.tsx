@@ -1,6 +1,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import api from '../services/api'
+import toast from 'react-hot-toast'
 
-type User = { id?: number; name?: string; email?: string; ultimo_login?: string } | null
+type User = { 
+  id?: number
+  name?: string
+  email?: string
+  ultimo_login?: string 
+} | null
 
 type AuthContextValue = {
   user: User
@@ -17,17 +24,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Minimal bootstrap: no real auth, simulate loaded state
-    setTimeout(() => setIsLoading(false), 200)
+    // Verificar si hay un token guardado
+    const token = localStorage.getItem('token')
+    if (token) {
+      // Verificar si el token es válido
+      api.get('/auth/user')
+        .then(response => {
+          setUser(response.data.user)
+        })
+        .catch(() => {
+          localStorage.removeItem('token')
+        })
+        .finally(() => {
+          setIsLoading(false)
+        })
+    } else {
+      setIsLoading(false)
+    }
   }, [])
 
-  const login = async (email: string, _password: string) => {
-    // TODO: replace with real API call; for now simulate success
-    setUser({ id: 1, name: 'Admin', email })
+  const login = async (email: string, password: string) => {
+    try {
+      const response = await api.post('/auth/login', { email, password })
+      
+      const { user, token } = response.data
+      
+      // Guardar token en localStorage
+      localStorage.setItem('token', token)
+      
+      // Actualizar estado del usuario
+      setUser(user)
+      
+      toast.success(`Bienvenido ${user.name}`)
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Error al iniciar sesión'
+      toast.error(message)
+      throw error
+    }
   }
 
   const logout = () => {
-    setUser(null)
+    // Llamar al endpoint de logout
+    api.post('/auth/logout')
+      .catch(() => {
+        // Ignorar errores del logout
+      })
+      .finally(() => {
+        localStorage.removeItem('token')
+        setUser(null)
+        window.location.href = '/login'
+      })
   }
 
   return (
