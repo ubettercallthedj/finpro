@@ -239,7 +239,7 @@ return new class extends Migration
         // ========================================
         Schema::create('liquidacion_detalle', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('liquidacion_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('liquidacion_id')->constrained('liquidaciones')->cascadeOnDelete();
             $table->enum('tipo', ['haber', 'descuento']);
             $table->string('codigo', 20);
             $table->string('concepto', 100);
