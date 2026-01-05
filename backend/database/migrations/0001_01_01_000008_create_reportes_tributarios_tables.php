@@ -489,7 +489,7 @@ return new class extends Migration
             
             $table->integer('descargas')->default(0);
             $table->timestamp('ultima_descarga')->nullable();
-            $table->index(['persona_id', 'tipo_certificado', 'anio_tributario'], 'idx_hist_cert_persona');
+            
             $table->foreignId('emitido_por')->constrained('users');
             $table->timestamps();
             
