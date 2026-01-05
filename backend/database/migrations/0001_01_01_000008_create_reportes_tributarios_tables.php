@@ -242,7 +242,11 @@ return new class extends Migration
         Schema::create('distribucion_detalle_contribuyente', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('reporte_consolidado_id')->constrained('reportes_distribucion_consolidado')->cascadeOnDelete();
+            $table->unsignedBigInteger('reporte_consolidado_id');
+            $table->foreign('reporte_consolidado_id', 'fk_dist_detalle_contrib_reporte')
+                ->references('id')
+                ->on('reportes_distribucion_consolidado')
+                ->cascadeOnDelete();
             $table->foreignId('edificio_id')->constrained()->cascadeOnDelete();
             $table->foreignId('unidad_id')->constrained('unidades')->cascadeOnDelete();
             $table->foreignId('persona_id')->constrained()->cascadeOnDelete(); // Copropietario/Contribuyente
