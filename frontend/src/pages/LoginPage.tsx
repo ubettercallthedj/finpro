@@ -2,11 +2,13 @@
 // LOGIN PAGE
 // ================================================
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom' // ← AGREGAR
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 
 export default function LoginPage() {
   const { login } = useAuth()
+  const navigate = useNavigate() // ← AGREGAR
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -18,6 +20,7 @@ export default function LoginPage() {
     try {
       await login(email, password)
       toast.success('¡Bienvenido!')
+      navigate('/dashboard') // ← AGREGAR ESTA LÍNEA
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Error al iniciar sesión')
     } finally {
