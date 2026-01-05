@@ -179,7 +179,7 @@ return new class extends Migration
         Schema::create('reunion_convocados', function (Blueprint $table) {
             $table->id();
             $table->foreignId('reunion_id')->constrained('reuniones')->cascadeOnDelete();
-            $table->foreignId('unidad_id')->constrained('unidades');
+            $table->foreignId('unidad_id')->constrained();
             $table->foreignId('persona_id')->nullable()->constrained('personas')->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             
@@ -339,7 +339,7 @@ return new class extends Migration
             $table->string('nombre', 100);
             $table->string('codigo', 20)->unique();
             $table->enum('tipo', ['consulta', 'reclamo', 'denuncia', 'solicitud', 'fiscalizacion', 'otro']);
-            $table->foreignId('institucion_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('institucion_id')->nullable()->constrained('instituciones')->nullOnDelete();
             $table->text('contenido');
             $table->json('variables')->nullable();
             $table->boolean('activa')->default(true);
@@ -354,7 +354,7 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->foreignId('edificio_id')->constrained()->cascadeOnDelete();
             $table->foreignId('plantilla_id')->nullable()->constrained('plantillas_oficio')->nullOnDelete();
-            $table->foreignId('institucion_id')->constrained();
+            $table->foreignId('institucion_id')->constrained('instituciones');
             
             $table->string('numero_oficio', 30);
             $table->date('fecha');
