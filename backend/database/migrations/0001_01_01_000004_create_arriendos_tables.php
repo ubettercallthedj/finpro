@@ -168,7 +168,7 @@ return new class extends Migration
         Schema::create('distribucion_detalle', function (Blueprint $table) {
             $table->id();
             $table->foreignId('distribucion_id')->constrained('distribuciones')->cascadeOnDelete();
-            $table->foreignId('unidad_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('unidad_id')->constrained('unidades')->cascadeOnDelete();
             $table->foreignId('beneficiario_id')->constrained('personas');
             
             $table->decimal('porcentaje_participacion', 10, 6);
@@ -198,7 +198,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->foreignId('edificio_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('unidad_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('unidad_id')->constrained('unidades')->cascadeOnDelete();
             $table->foreignId('beneficiario_id')->constrained('personas');
             
             $table->integer('anio');
