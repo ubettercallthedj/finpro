@@ -178,7 +178,7 @@ return new class extends Migration
         // ========================================
         Schema::create('reunion_convocados', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('reunion_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('reunion_id')->constrained('reuniones')->cascadeOnDelete();
             $table->foreignId('unidad_id')->constrained();
             $table->foreignId('persona_id')->nullable()->constrained('personas')->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
@@ -207,7 +207,7 @@ return new class extends Migration
         // ========================================
         Schema::create('votaciones', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('reunion_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('reunion_id')->constrained('reuniones')->cascadeOnDelete();
             
             $table->string('titulo', 200);
             $table->text('descripcion')->nullable();
@@ -240,7 +240,7 @@ return new class extends Migration
         // ========================================
         Schema::create('votos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('votacion_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('votacion_id')->constrained('votaciones')->cascadeOnDelete();
             $table->foreignId('convocado_id')->constrained('reunion_convocados')->cascadeOnDelete();
             
             $table->string('voto', 100);
@@ -258,7 +258,7 @@ return new class extends Migration
         // ========================================
         Schema::create('actas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('reunion_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('reunion_id')->constrained('reuniones')->cascadeOnDelete();
             
             $table->string('numero_acta', 30);
             $table->date('fecha');
