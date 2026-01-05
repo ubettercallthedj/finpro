@@ -244,7 +244,7 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->foreignId('reporte_consolidado_id')->constrained('reportes_distribucion_consolidado')->cascadeOnDelete();
             $table->foreignId('edificio_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('unidad_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('unidad_id')->constrained('unidades')->cascadeOnDelete();
             $table->foreignId('persona_id')->constrained()->cascadeOnDelete(); // Copropietario/Contribuyente
             
             $table->year('anio');
@@ -341,7 +341,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->foreignId('edificio_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('unidad_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('unidad_id')->constrained('unidades')->cascadeOnDelete();
             $table->foreignId('solicitante_id')->nullable()->constrained('personas');
             
             $table->string('numero_certificado', 30)->unique();
@@ -402,7 +402,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->foreignId('edificio_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('unidad_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('unidad_id')->constrained('unidades')->cascadeOnDelete();
             
             $table->year('anio');
             $table->date('fecha_revision');
@@ -460,7 +460,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->foreignId('edificio_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('unidad_id')->nullable()->constrained();
+            $table->foreignId('unidad_id')->nullable()->constrained('unidades');
             $table->foreignId('persona_id')->constrained();
             
             $table->enum('tipo_certificado', [
