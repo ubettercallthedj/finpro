@@ -28,28 +28,18 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-if (!$user || !Hash::check($request->password, $user->password)) {
-    throw ValidationException::withMessages([
-        'email' => ['Credenciales inválidas'],
-    ]);
-}
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['Credenciales inválidas'],
+            ]);
+        }
 
-$token = $user->createToken('auth-token')->plainTextToken;
-
-return response()->json([
-    'user' => $user,
-    'token' => $token,
-    'message' => 'Bienvenido ' . $user->name,
-]);
+        $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'tenant_id' => $user->tenant_id,
-            ],
+            'user' => $user,
             'token' => $token,
+            'message' => 'Bienvenido ' . $user->name,
         ]);
     }
 
