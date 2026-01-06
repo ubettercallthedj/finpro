@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Validation\ValidationException;
 
 // ========================================
 // AUTH CONTROLLER
@@ -25,28 +26,21 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $user = DB::table('users')->where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Credenciales inválidas'], 401);
-        }
+if (!$user || !Hash::check($request->password, $user->password)) {
+    throw ValidationException::withMessages([
+        'email' => ['Credenciales inválidas'],
+    ]);
+}
 
-        if (!$user->activo) {
-            return response()->json(['message' => 'Usuario desactivado'], 403);
-        }
+$token = $user->createToken('auth-token')->plainTextToken;
 
-        DB::table('users')->where('id', $user->id)->update(['ultimo_login' => now()]);
-
-        $token = Str::random(64);
-        DB::table('personal_access_tokens')->insert([
-            'tokenable_type' => 'App\\Models\\User',
-            'tokenable_id' => $user->id,
-            'name' => 'auth_token',
-            'token' => hash('sha256', $token),
-            'abilities' => json_encode(['*']),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+return response()->json([
+    'user' => $user,
+    'token' => $token,
+    'message' => 'Bienvenido ' . $user->name,
+]);
 
         return response()->json([
             'user' => [
